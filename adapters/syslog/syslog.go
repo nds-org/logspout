@@ -36,7 +36,12 @@ func NewSyslogAdapter(route *router.Route) (router.LogAdapter, error) {
 	}
 	conn, err := transport.Dial(route.Address, route.Options)
 	if err != nil {
-		return nil, err
+		fmt.Println("couldn't connect to server, retrying")
+		time.Sleep(time.Second * 5)
+		conn, err = transport.Dial(route.Address, route.Options)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	format := getopt("SYSLOG_FORMAT", "rfc5424")
