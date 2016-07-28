@@ -8,3 +8,5 @@ RUN cd /src && ./build.sh "$(cat VERSION)"
 
 ONBUILD COPY ./modules.go /src/modules.go
 ONBUILD RUN cd /src && ./build.sh "$(cat VERSION)-custom"
+
+RUN apk add --update bash && rm -rf /var/cache/apk/*

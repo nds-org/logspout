@@ -10,3 +10,5 @@ RUN go get
 CMD go get \
 	&& go build -ldflags "-X main.Version dev" -o /bin/logspout \
 	&& exec /bin/logspout
+
+RUN apk add --update bash && rm -rf /var/cache/apk/*
