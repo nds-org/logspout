@@ -172,11 +172,15 @@ func (rm *RouteManager) Run() error {
 	rm.routing = true
 	rm.Unlock()
 	rm.wg.Wait()
+	// Temp fix to allow logspout to run without routes defined.
+	if len(rm.routes) == 0 {
+		select {}
+	}
 	return nil
 }
 
 func (rm *RouteManager) Name() string {
-	return ""
+	return "routes"
 }
 
 func (rm *RouteManager) Setup() error {
