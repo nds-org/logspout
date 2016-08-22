@@ -65,14 +65,36 @@ func logDriverSupported(container *docker.Container) bool {
 func ignoreContainer(container *docker.Container) bool {
 	for _, kv := range container.Config.Env {
 		kvp := strings.SplitN(kv, "=", 2)
-		if len(kvp) == 2 && kvp[0] == "LOGSPOUT" && strings.ToLower(kvp[1]) == "ignore" {
-			return true
+		if len(kvp) == 2 {
+			if kvp[0] == "LOGSPOUT" && strings.ToLower(kvp[1]) == "ignore" {
+				return true
+			}
 		}
 	}
+
 	excludeLabel := getopt("EXCLUDE_LABEL", "")
 	if value, ok := container.Config.Labels[excludeLabel]; ok {
 		return len(excludeLabel) > 0 && strings.ToLower(value) == "true"
 	}
+
+	labels := container.Config.Labels
+	for _, env := range os.Environ() {
+		kvp := strings.SplitN(env, "=", 2)
+		if kvp[0] == "LABEL" {
+			// label was specified, so ignore the container unless it matches
+			match := false
+			lvp := strings.SplitN(kvp[1], ":", 2)
+			for label, value := range labels {
+				pattern := regexp.MustCompile(lvp[1])
+				if label == lvp[0] && pattern.MatchString(value) {
+					match = true
+				}
+			}
+
+			return (match == false)
+		}
+	}
+
 	return false
 }
 
